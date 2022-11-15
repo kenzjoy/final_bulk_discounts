@@ -7,6 +7,7 @@
 <li class="right_tab"><%=link_to "Dashboard", "/merchants/#{merchant_id}/dashboard"%></li>
 <li class="right_tab"><%=link_to "Merchant Items", "/merchants/#{merchant_id}/items"%></li>
 <li class="right_tab"><%=link_to "Merchant Invoices", "/merchants/#{merchant_id}/invoices"%></li>
+<li class="right_tab"><%= link_to 'Bulk Discounts', merchant_bulk_discounts_path(merchant_id) %></li>
 </ul>
 </div>
 <hr>

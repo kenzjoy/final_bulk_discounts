@@ -1,9 +1,13 @@
 require 'rails_helper'
 
-RSpec.describe "the merchant's dashboard page" do
+RSpec.describe "merchants bulk index page", type: :feature do
   before :each do
     @crystal_moon = Merchant.create!(name: "Crystal Moon Designs")
     @surf_designs = Merchant.create!(name: "Surf & Co. Designs")
+
+    @bulk_discount_a = BulkDiscount.create!(merchant_id: @crystal_moon.id, percentage_discount: 20, quantity_threshold: 10)
+    @bulk_discount_b = BulkDiscount.create!(merchant_id: @crystal_moon.id, percentage_discount: 15, quantity_threshold: 5)
+    @bulk_discount_c = BulkDiscount.create!(merchant_id: @surf_designs.id, percentage_discount: 30, quantity_threshold: 20)
 
     @pearl = @crystal_moon.items.create!(name: "Pearl", description: "Not a BlackPearl!", unit_price: 25)
     @moon_rock = @crystal_moon.items.create!(name: "Moon Rock", description: "Evolve Your Pokemon!", unit_price: 105)
@@ -72,81 +76,28 @@ RSpec.describe "the merchant's dashboard page" do
     @transaction_13 = Transaction.create!(result: 1, invoice_id: @invoice_13.id, credit_card_number: 0015)
     @transaction_14 = Transaction.create!(result: 1, invoice_id: @invoice_14.id, credit_card_number: 0016)
   end
-  it "shows the merchant's name" do
-    @crystal_moon = Merchant.create!(name: "Crystal Moon Designs")
 
-    visit "/merchants/#{@crystal_moon.id}/dashboard"
+  it 'shows all of my bulk discounts including their percentage discount and quantity threashold.' do
+    visit merchant_bulk_discounts_path(@crystal_moon)
 
-    expect(page).to have_content("Crystal Moon Designs")
+    expect(page).to have_content("Save 20% when you purchase 10 of the same item.")
+    expect(page).to have_content("Save 15% when you purchase 5 of the same item.")
   end
 
-  it 'displays links to the merchant items index and the merchant invoices index' do
-    merchant_1 = Merchant.create!(name: "Test Merchant")
-    visit "/merchants/#{merchant_1.id}/dashboard"
+  it 'each bulk discount listed includes a link to its show page' do
+    visit merchant_bulk_discounts_path(@crystal_moon)
+save_and_open_page
+    expect(page).to have_css("#merchant-discount#{@bulk_discount_a.id}")
+    expect(page).to have_css("#merchant-discount#{@bulk_discount_b.id}")
+    expect(page).to_not have_css("#merchant-discount#{@bulk_discount_c.id}")
+    
+    within "#merchant-discount#{@bulk_discount_a.id}" do
+      expect(page).to have_link("Learn more about this offer!", :href => merchant_bulk_discount_path(@crystal_moon, @bulk_discount_a))
+    end
 
-    expect(page).to have_link("Merchant Items")
-    # click_link("Merchant Items")
-    # expect(current_path).to eq("/merchants/#{merchant_1.id}/items")
-
-    # visit "/merchants/#{merchant_1.id}/dashboard"
-
-    expect(page).to have_link("Merchant Invoices")
-    # click_link("Merchant Invoices")
-    # expect(current_path).to eq("/merchants/#{merchant_1.id}/invoices")
-  end
-
-  it "shows the top 5 favorite customers and number of @transactions they've had" do
-
-
-    visit "/merchants/#{@crystal_moon.id}/dashboard"
-
-    expect(page).to have_content("Name: Paul, Number of Transactions: 2")
-    expect(page).to have_content("Name: Frodo, Number of Transactions: 2")
-    expect(page).to have_content("Name: Hamada, Number of Transactions: 2")
-    expect(page).to have_content("Name: Abbas, Number of Transactions: 2")
-    expect(page).to have_content("Name: Sam, Number of Transactions: 2")
-    expect(page).to_not have_content("Eevee")
-  end
-
-  it "shows a list of the names of all items and their invoice id that have been ordered and have not yet been shipped" do
-    visit "/merchants/#{@crystal_moon.id}/dashboard"
-
-    expect(page).to have_content("Items Ready to Ship")
-    expect(page).to have_content("Pearl")
-    expect(page).to have_content("Moon Rock")
-    expect(page).to have_content("Lapis Lazuli")
-    expect(page).to have_content("Topaz")
-    expect(page).to have_content(@pearl_invoice.invoice_id)
-    expect(page).to have_content(@moon_rock_invoice.invoice_id)
-    expect(page).to have_content(@lapis_lazuli_invoice.invoice_id)
-    expect(page).to have_content(@topaz_invoice.invoice_id)
-    # save_and_open_page
-  end
-
-  it "each invoice id is a link to my merchant's invoice show page" do
-    visit "/merchants/#{@crystal_moon.id}/dashboard"
-
-    expect(page).to have_link("#{@pearl_invoice.invoice_id}")
-    # click_link(@pearl_invoice.invoice_id)
-    # expect(current_path).to eql("/merchants/#{@crystal_moon.id}/invoices/#{@pearl_invoice.invoice_id}")
-  end
-
-  it "displays the date that each invoice was created, ordered from oldest to newest" do
-    visit "/merchants/#{@crystal_moon.id}/dashboard"
-
-    expect(page).to have_content(@crystal_moon.items_ready_to_ship.first[:created_at].strftime("%A, %B%e, %Y"))
-
-    expect("Pearl").to appear_before("Moon Rock")
-    expect("Moon Rock").to appear_before("Lapis Lazuli")
-    expect("Lapis Lazuli").to appear_before("Topaz")
-    # save_and_open_page
-  end
-
-  it "shows a link to view my discounts. the link brings me to my bulk discounts index page" do
-    visit "/merchants/#{@crystal_moon.id}/dashboard"
-
-    expect(page).to have_link("Bulk Discounts")
-
-    click_link("Bulk Discounts", :href => merchant_bulk_discounts_path(@crystal_moon))
+    within "#merchant-discount#{@bulk_discount_b.id}" do
+      expect(page).to have_link("Learn more about this offer!", :href => merchant_bulk_discount_path(@crystal_moon, @bulk_discount_b))
+    end
   end
 end
+
