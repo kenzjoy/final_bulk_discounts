@@ -1,8 +1,8 @@
 require 'rails_helper'
 
-RSpec.describe 'merchants bulk discount show page', type: :feature do
+RSpec.describe 'merchant bulk discount edit page', type: :feature do
   describe 'as a merchant' do
-    describe 'when I visit a bulk discounts show page' do
+    describe 'when I visit edit_merchant_bulk_discount_path' do
       before :each do
         @crystal_moon = Merchant.create!(name: "Crystal Moon Designs")
         @surf_designs = Merchant.create!(name: "Surf & Co. Designs")
@@ -79,27 +79,29 @@ RSpec.describe 'merchants bulk discount show page', type: :feature do
         @transaction_14 = Transaction.create!(result: 1, invoice_id: @invoice_14.id, credit_card_number: 0016)
       end
 
-      it 'show the bulk discounts quantity threshold and percentage discount' do
-        visit merchant_bulk_discount_path(@crystal_moon, @bulk_discount_a)
+      it 'has a form with the discounts current attributes pre-populated in the form' do
+        visit edit_merchant_bulk_discount_path(@crystal_moon, @bulk_discount_a)
 
-        expect(page).to have_content("Details About Crystal Moon Designs's 20% Bulk Discount:")
-        expect(page).to have_content("Percentage Discount: 20%")
-        expect(page).to have_content("Quantity Threshold: 10")
-        expect(page).to have_content("Terms & Conditions:")
-        expect(page).to have_content("If the quantity of an item ordered meets or exceeds the quantity threshold, then the percentage discount should apply to that item only. Other items that did not meet the quantity threshold will not be affected.")
-        expect(page).to have_content("The quantities of multiple unique items ordered cannot be added together to meet the quantity thresholds.")
+        expect(page).to have_selector(:css, "form")
+        expect(page).to have_field(:percentage_discount, with: 20)
+        expect(page).to have_field(:quantity_threshold, with: 10)
+        expect(page).to have_button("Submit")
       end
 
-      it 'has a link to edit the bulk discount. when I click this link, I am 
-      taken to a new page to edit the discount.' do
-        visit merchant_bulk_discount_path(@crystal_moon, @bulk_discount_b)
+      it 'when I change any/all of the information and click submit, I am redirected
+      back to the bulk discounts show page and I see that the discounts attributes 
+      have been updated' do
+        visit edit_merchant_bulk_discount_path(@crystal_moon, @bulk_discount_a)
 
-        expect(page).to have_link("Edit This Bulk Discount", :href => edit_merchant_bulk_discount_path(@crystal_moon, @bulk_discount_b))
+        fill_in :percentage_discount, with: 25
+        fill_in :quantity_threshold, with: 15
+        click_button "Submit"
 
-        click_link("Edit This Bulk Discount")
+        expect(current_path).to eq(merchant_bulk_discount_path(@crystal_moon, @bulk_discount_a))
 
-        expect(current_path).to eq(edit_merchant_bulk_discount_path(@crystal_moon, @bulk_discount_b))
-      end
+        expect(page).to have_content("Percentage Discount: 25%")
+        expect(page).to have_content("Quantity Threshold: 15")
+      end 
     end
   end
 end
