@@ -79,7 +79,7 @@ RSpec.describe 'new merchant bulk discount view page', type: :feature do
         @transaction_14 = Transaction.create!(result: 1, invoice_id: @invoice_14.id, credit_card_number: 0016)
       end
 
-      xit 'I see a form to add a new bulk discount' do
+      it 'I see a form to add a new bulk discount' do
         visit new_merchant_bulk_discount_path(@surf_designs)
 
         expect(page).to have_selector(:css, "form")
@@ -88,7 +88,7 @@ RSpec.describe 'new merchant bulk discount view page', type: :feature do
         expect(page).to have_button("Submit")
       end
 
-      xit 'when I fill in the form with valid data, I am redirected
+      it 'when I fill in the form with valid data, I am redirected
       back to the bulk discount index, and I see my new bulk discount' do 
         visit new_merchant_bulk_discount_path(@surf_designs)
 
