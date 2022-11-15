@@ -147,6 +147,6 @@ RSpec.describe "the merchant's dashboard page" do
 
     expect(page).to have_link("Bulk Discounts")
 
-    click_link("Bulk Discounts", :href => merchant_bulk_discounts_path(@merchant1))
+    click_link("Bulk Discounts", :href => merchant_bulk_discounts_path(@crystal_moon))
   end
 end
