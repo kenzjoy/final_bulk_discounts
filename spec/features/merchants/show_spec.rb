@@ -141,4 +141,12 @@ RSpec.describe "the merchant's dashboard page" do
     expect("Lapis Lazuli").to appear_before("Topaz")
     # save_and_open_page
   end
+
+  it "shows a link to view my discounts. the link brings me to my bulk discounts index page" do
+    visit "/merchants/#{@crystal_moon.id}/dashboard"
+
+    expect(page).to have_link("Bulk Discounts")
+
+    click_link("Bulk Discounts", :href => merchant_bulk_discounts_path(@merchant1))
+  end
 end
