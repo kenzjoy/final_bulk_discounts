@@ -136,7 +136,7 @@ RSpec.describe "merchants bulk index page", type: :feature do
     end
 
     expect(current_path).to eq(merchant_bulk_discounts_path(@crystal_moon))
-    expect(page).to have_css("#merchant-discount#{@bulk_discount_a.id}")
+    expect(page).to_not have_css("#merchant-discount#{@bulk_discount_a.id}")
   end
 end
 
