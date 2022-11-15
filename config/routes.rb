@@ -13,6 +13,10 @@ Rails.application.routes.draw do
     resources :invoices, except: [:update]
   end
 
+  resources :merchants, only: [:show] do
+    resources :bulk_discounts
+  end
+
   patch '/merchants/:merchant_id/invoices/:id', to: 'invoices#update'
 
   namespace :admin do
@@ -30,3 +34,19 @@ Rails.application.routes.draw do
 
   patch '/admin/merchants/:id', to: 'admin/merchants#update'
 end
+
+# try to model this down the road
+# resources :merchant, only: [:show] do
+#   resources :bulk_discounts
+#   resources :dashboard, only: [:index]
+#   resources :items, except: [:destroy]
+#   resources :item_status, only: [:update]
+#   resources :invoices, only: [:index, :show, :update]
+# end
+
+# namespace :admin do
+#   resources :dashboard, only: [:index]
+#   resources :merchants, except: [:destroy]
+#   resources :merchant_status, only: [:update]
+#   resources :invoices, except: [:new, :destroy]
+# end
