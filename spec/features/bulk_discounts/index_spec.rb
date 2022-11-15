@@ -86,7 +86,7 @@ RSpec.describe "merchants bulk index page", type: :feature do
 
   it 'each bulk discount listed includes a link to its show page' do
     visit merchant_bulk_discounts_path(@crystal_moon)
-save_and_open_page
+
     expect(page).to have_css("#merchant-discount#{@bulk_discount_a.id}")
     expect(page).to have_css("#merchant-discount#{@bulk_discount_b.id}")
     expect(page).to_not have_css("#merchant-discount#{@bulk_discount_c.id}")
@@ -99,5 +99,16 @@ save_and_open_page
       expect(page).to have_link("Learn more about this offer!", :href => merchant_bulk_discount_path(@crystal_moon, @bulk_discount_b))
     end
   end
+
+  it 'shows a link to create a new discount' do
+    visit merchant_bulk_discounts_path(@surf_designs)
+
+    expect(page).to have_css("#new-bulk-discount")
+
+    within "#new-bulk-discount" do
+      expect(page).to have_link("Create A New Bulk Discount", :href => new_merchant_bulk_discount_path(@surf_designs))
+    end
+  end
+
 end
 
