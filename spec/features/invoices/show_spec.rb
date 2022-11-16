@@ -89,7 +89,7 @@ RSpec.describe 'merchant invoices show page' do
 
         expect(page).to have_content("Invoice: #{@invoice_12.id}")
         expect(page).to have_content("Status: #{@invoice_12.status}")
-        expect(page).to have_content("Created On: #{@invoice_12.created_at.strftime("%A, %B%e, %Y")}")
+        expect(page).to have_content("Created On: #{@invoice_12.created_at.strftime("%A, %B %e, %Y")}")
         expect(page).to have_content("Customer: #{@invoice_12.customer.first_name} #{@invoice_12.customer.last_name}")
       end
 
@@ -124,6 +124,30 @@ RSpec.describe 'merchant invoices show page' do
         visit merchant_invoice_path(@surf_designs, @invoice_6)
 
         expect(page).to have_content("Total revenue for invoice ##{@invoice_6.id} with applicable bulk discounts: $6280.0") # $5880 snorkle 
+      end
+
+      it 'next to each invoice item I see a link to the show page for the bulk discount that was applied (if any)' do
+        graphic_tees = Merchant.create!(name: "Sick Graphic Tees")
+        discount_1 = BulkDiscount.create!(merchant_id: graphic_tees.id, percentage_discount: 20, quantity_threshold: 10)
+        discount_2 = BulkDiscount.create!(merchant_id: graphic_tees.id, percentage_discount: 15, quantity_threshold: 5)
+        discount_3 = BulkDiscount.create!(merchant_id: graphic_tees.id, percentage_discount: 30, quantity_threshold: 20)
+        white_tee = graphic_tees.items.create!(name: "White Tee", description: "Freshy Fresh", unit_price: 25)
+        black_tee = graphic_tees.items.create!(name: "Black Tee", description: "Smooth", unit_price: 105)
+        green_tee = graphic_tees.items.create!(name: "Green Tee", description: "Minty Fresh", unit_price: 45)
+        pink_tee = graphic_tees.items.create!(name: "Pink Tee", description: "An androgynous delight", unit_price: 55)
+        paulito = Customer.create!(first_name: "Paulito", last_name: "Pequino")
+        invoice = Invoice.create!(status: 2, customer_id: paulito.id)
+        white_tee_invoice = InvoiceItem.create!(item_id: white_tee.id, invoice_id: invoice.id, quantity: 2, unit_price: 25, status: 1)
+        black_tee_invoice = InvoiceItem.create!(item_id: black_tee.id, invoice_id: invoice.id, quantity: 10, unit_price: 105, status: 1)
+        green_tee_invoice = InvoiceItem.create!(item_id: green_tee.id, invoice_id: invoice.id, quantity: 7, unit_price: 45, status: 1)
+        pink_tee_invoice = InvoiceItem.create!(item_id: pink_tee.id, invoice_id: invoice.id, quantity: 20, unit_price: 55, status: 1)
+        transaction = Transaction.create!(result: 1, invoice_id: invoice.id, credit_card_number: 0001)
+
+        visit merchant_invoice_path(graphic_tees, invoice)
+
+        expect(page).to have_link("20", :href => merchant_bulk_discount_path(graphic_tees, discount_1))
+        expect(page).to have_link("15", :href => merchant_bulk_discount_path(graphic_tees, discount_2))
+        expect(page).to have_link("30", :href => merchant_bulk_discount_path(graphic_tees, discount_3))
       end
     end
   end

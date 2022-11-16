@@ -13,4 +13,11 @@ class InvoiceItem < ApplicationRecord
   def self.sort_by_invoice_creation_date
     joins(:invoice).order('invoices.created_at')
   end
+
+  def discount_applied
+    bulk_discounts
+      .where("bulk_discounts.quantity_threshold <= ?", quantity)
+      .order("bulk_discounts.percentage_discount desc")
+      .first
+  end
 end
