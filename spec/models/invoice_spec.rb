@@ -116,6 +116,7 @@ RSpec.describe Invoice, type: :model do
 
     describe '#total_revenue(merchant_id)' do
       it 'gives us the total revenue of all items on this invoice that belong to the given merchant' do
+        expect(@invoice_6.total_revenue(@crystal_moon.id)).to eq(425)
         expect(@invoice_6.total_revenue(@surf_designs.id)).to eq(8800)
       end
     end
@@ -127,15 +128,16 @@ RSpec.describe Invoice, type: :model do
     end
 
     describe '#discount_amount(merchant_id)' do
-      xit 'provides the total amount of money being taken off for a disocunt' do
-        expect(@invoice_6.discount_amount(@surf_designs.id)).to eq()
-        expect(@invoice_6.discount_amount(@crystal_moon.id)).to eq()
+      it 'provides the total amount of money being taken off for a disocunt' do
+        expect(@invoice_6.discount_amount(@crystal_moon.id)).to eq(63.75)
+        expect(@invoice_6.discount_amount(@surf_designs.id)).to eq(2520)
       end
     end
 
     describe '#discount_revenue(merchant_id)' do
-      xit 'provides a merchants invoice revenue with applied bulk discounts on applicable items' do
-
+      it 'provides a merchants invoice revenue with applied bulk discounts on applicable items' do
+        expect(@invoice_6.revenue_after_discount(@crystal_moon.id)).to eq(361.25)
+        expect(@invoice_6.revenue_after_discount(@surf_designs.id)).to eq(6280)
       end
     end
   end
