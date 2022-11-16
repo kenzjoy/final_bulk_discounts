@@ -99,6 +99,7 @@ RSpec.feature "Admin Invoice Show Page", type: :feature do
       # @invoice_1.created_at = Time.new(2022, 11, 8)
       @invoice_1.update!(created_at: Time.new(2022, 11, 8)) #using .update will save the update to created_at
       visit admin_invoice_path(@invoice_1)
+
       expect(page).to have_content("ID: #{@invoice_1.id}")
       expect(page).to have_content("Status: completed")
       expect(page).to have_content("Created on Tuesday, November 8, 2022")
@@ -147,6 +148,32 @@ RSpec.feature "Admin Invoice Show Page", type: :feature do
 
       expect(current_path).to eq(admin_invoice_path(@invoice_15))
       expect(@invoice_15.reload.status).to eq("cancelled")
+    end
+
+    it 'shows the total revenue from this invoice with and without applied discounts' do
+      graphic_tees = Merchant.create!(name: "Sick Graphic Tees")
+      tired_sparkles = Merchant.create!(name: "Glitter For Sleep")
+      discount_1 = BulkDiscount.create!(merchant_id: graphic_tees.id, percentage_discount: 20, quantity_threshold: 10)
+      discount_2 = BulkDiscount.create!(merchant_id: graphic_tees.id, percentage_discount: 15, quantity_threshold: 5)
+      discount_3 = BulkDiscount.create!(merchant_id: graphic_tees.id, percentage_discount: 30, quantity_threshold: 20)
+      white_tee = graphic_tees.items.create!(name: "White Tee", description: "Freshy Fresh", unit_price: 25)
+      black_tee = graphic_tees.items.create!(name: "Black Tee", description: "Smooth", unit_price: 105)
+      green_tee = graphic_tees.items.create!(name: "Green Tee", description: "Minty Fresh", unit_price: 45)
+      pink_tee = graphic_tees.items.create!(name: "Pink Tee", description: "An androgynous delight", unit_price: 55)
+      pink_glitter = tired_sparkles.items.create!(name: "Pink Sparkles", description: "An androgynous delight but make it tired", unit_price: 55)
+      paulito = Customer.create!(first_name: "Paulito", last_name: "Pequino")
+      invoice = Invoice.create!(status: 2, customer_id: paulito.id)
+      white_tee_invoice = InvoiceItem.create!(item_id: white_tee.id, invoice_id: invoice.id, quantity: 2, unit_price: 25, status: 1)
+      black_tee_invoice = InvoiceItem.create!(item_id: black_tee.id, invoice_id: invoice.id, quantity: 10, unit_price: 105, status: 1)
+      green_tee_invoice = InvoiceItem.create!(item_id: green_tee.id, invoice_id: invoice.id, quantity: 7, unit_price: 45, status: 1)
+      pink_tee_invoice = InvoiceItem.create!(item_id: pink_tee.id, invoice_id: invoice.id, quantity: 20, unit_price: 55, status: 1)
+      pink_g_invoice = InvoiceItem.create!(item_id: pink_glitter.id, invoice_id: invoice.id, quantity: 20, unit_price: 55, status: 1)
+      transaction = Transaction.create!(result: 1, invoice_id: invoice.id, credit_card_number: 0001)
+
+      visit admin_invoice_path(graphic_tees)
+
+      expect(page).to have_content("Total Revenue: $2515")
+      expect(page).to have_content("Total revenue for invoice ##{invoice.id} with applicable bulk discounts: $1927.75")
     end
   end
 end

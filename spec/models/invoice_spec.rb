@@ -140,5 +140,17 @@ RSpec.describe Invoice, type: :model do
         expect(@invoice_6.revenue_after_discount(@surf_designs.id)).to eq(6280)
       end
     end
+
+    describe '#admin_total_discount' do
+      it 'provides the total amount of money being taken off for a disocunt' do
+        expect(@invoice_6.admin_total_discount).to eq(2583.75)
+      end 
+    end
+
+    describe '#admin_revenue_after_discount' do
+      it 'provides a merchants invoice revenue with applied bulk discounts on applicable items' do
+        expect(@invoice_6.admin_revenue_after_discount).to eq(6641.25)      
+      end
+    end
   end
 end
