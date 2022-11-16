@@ -22,5 +22,5 @@
   <% end %>
 <% end %>
 
-<p>Total pre-discount revenue for invoice <%= @invoice.id %>: $<%=@total_revenue%></p>
-<p>Total revenue for invoice <%= @invoice.id %> with applicable bulk discounts: $<%= @invoice.revenue_after_discount(@merchant.id) %></p>
+<p>Total pre-discount revenue for invoice #<%= @invoice.id %>: $<%=@total_revenue%></p>
+<p>Total revenue for invoice #<%= @invoice.id %> with applicable bulk discounts: $<%= @invoice.revenue_after_discount(@merchant.id) %></p>
