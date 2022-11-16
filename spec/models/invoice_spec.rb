@@ -134,7 +134,7 @@ RSpec.describe Invoice, type: :model do
       end
     end
 
-    describe '#discount_revenue(merchant_id)' do
+    describe '#revenue_after_discount(merchant_id)' do
       it 'provides a merchants invoice revenue with applied bulk discounts on applicable items' do
         expect(@invoice_6.revenue_after_discount(@crystal_moon.id)).to eq(361.25)
         expect(@invoice_6.revenue_after_discount(@surf_designs.id)).to eq(6280)
