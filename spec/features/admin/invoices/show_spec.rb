@@ -94,6 +94,7 @@ RSpec.feature "Admin Invoice Show Page", type: :feature do
       @transaction_21 = Transaction.create!(result: 0, invoice_id: @invoice_21.id, credit_card_number: 0016)
       @transaction_22 = Transaction.create!(result: 0, invoice_id: @invoice_17.id, credit_card_number: 0016)
     end
+
     it 'shows information related to the invoice' do
       # @invoice_1.created_at = Time.new(2022, 11, 8)
       @invoice_1.update!(created_at: Time.new(2022, 11, 8)) #using .update will save the update to created_at
@@ -103,31 +104,33 @@ RSpec.feature "Admin Invoice Show Page", type: :feature do
       expect(page).to have_content("Created on Tuesday, November 8, 2022")
       expect(page).to have_content("Customer: Paul Walker")
     end
+
     it 'shows the total revenue that will be generated from the invoice' do
       visit admin_invoice_path(@invoice_6)
-      expect(page).to have_content("Total Revenue: $17.70")
+      expect(page).to have_content("Total Revenue: $1770")
     end
 
     it "shows the list of items on the invoice along with the items' ordered quantity, price it was sold for and invoice item status" do
       visit admin_invoice_path(@invoice_6)
 
-      expect(page).to have_content(@emerald.name)
-      expect(page).to have_content(@emerald_invoice.quantity)
-      expect(page).to have_content(@emerald_invoice.unit_price.to_f/100)
-      expect(page).to have_content(@emerald_invoice.status)
-      expect(page).to have_content(@surf_board.name)
-      expect(page).to have_content(@surf_board_invoice.quantity)
-      expect(page).to have_content(@surf_board_invoice.unit_price.to_f/100)
-      expect(page).to have_content(@surf_board_invoice.status)
-      expect(page).to have_content(@snorkel.name)
-      expect(page).to have_content(@snorkel_invoice.quantity)
-      expect(page).to have_content(@snorkel_invoice.unit_price.to_f/100)
-      expect(page).to have_content(@snorkel_invoice.status)
+      expect(page).to have_content("Emerald")
+      expect(page).to have_content("Quantity: 2")
+      expect(page).to have_content("Price: $85.00")
+      expect(page).to have_content("Status: shipped")
+      expect(page).to have_content("Surf Board")
+      expect(page).to have_content("Quantity: 2")
+      expect(page).to have_content("Price: $200.00")
+      expect(page).to have_content("Status: packaged")
+      expect(page).to have_content("Snorkel")
+      expect(page).to have_content("Quantity: 3")
+      expect(page).to have_content("Price: $400.00")
+      expect(page).to have_content("Status: packaged")
     end
 
     it 'the invoice status is a select field, and I see that the invoices current status is selected.
     when I click the select field, I can select a new status for the invoice.' do
       visit admin_invoice_path(@invoice_6)
+      
       expect(page).to have_select("Change Status", selected: "Completed")
     end
 
