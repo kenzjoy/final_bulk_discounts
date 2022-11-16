@@ -15,6 +15,10 @@ RSpec.describe Invoice, type: :model do
       @crystal_moon = Merchant.create!(name: "Crystal Moon Designs")
       @surf_designs = Merchant.create!(name: "Surf & Co. Designs")
 
+      @bulk_discount_a = BulkDiscount.create!(merchant_id: @crystal_moon.id, percentage_discount: 20, quantity_threshold: 10)
+      @bulk_discount_b = BulkDiscount.create!(merchant_id: @crystal_moon.id, percentage_discount: 15, quantity_threshold: 5)
+      @bulk_discount_c = BulkDiscount.create!(merchant_id: @surf_designs.id, percentage_discount: 30, quantity_threshold: 20)
+    
       @pearl = @crystal_moon.items.create!(name: "Pearl", description: "Not a BlackPearl!", unit_price: 25)
       @moon_rock = @crystal_moon.items.create!(name: "Moon Rock", description: "Evolve Your Pokemon!", unit_price: 105)
       @lapis_lazuli = @crystal_moon.items.create!(name: "Lapis Lazuli", description: "Not the Jewel Knight!", unit_price: 45)
@@ -31,7 +35,7 @@ RSpec.describe Invoice, type: :model do
       @zinc = @surf_designs.items.create!(name: "100% Zinc Face Protectant", description: "Our original organic formula!", unit_price: 13)
       @surf_board = @surf_designs.items.create!(name: "Surf Board", description: "Our original 12' board!", unit_price: 200)
       @snorkel = @surf_designs.items.create!(name: "Snorkel", description: "Perfect for reef viewing!", unit_price: 400)
-
+      
       @paul = Customer.create!(first_name: "Paul", last_name: "Walker")
       @sam = Customer.create!(first_name: "Sam", last_name: "Gamgee")
       @abbas = Customer.create!(first_name: "Abbas", last_name: "Firnas")
@@ -67,7 +71,7 @@ RSpec.describe Invoice, type: :model do
       @lapis_lazuli_invoice = InvoiceItem.create!(item_id: @lapis_lazuli.id, invoice_id: @invoice_3.id, quantity: 2, unit_price: 45, status: 1)
       @topaz_invoice = InvoiceItem.create!(item_id: @topaz.id, invoice_id: @invoice_4.id, quantity: 2, unit_price: 55, status: 1)
       @amethyst_invoice = InvoiceItem.create!(item_id: @amethyst.id, invoice_id: @invoice_5.id, quantity: 2, unit_price: 55, status: 2)
-      @emerald_invoice = InvoiceItem.create!(item_id: @emerald.id, invoice_id: @invoice_6.id, quantity: 2, unit_price: 85, status: 2)
+      @emerald_invoice = InvoiceItem.create!(item_id: @emerald.id, invoice_id: @invoice_6.id, quantity: 5, unit_price: 85, status: 2)
       @ruby_invoice = InvoiceItem.create!(item_id: @ruby.id, invoice_id: @invoice_7.id, quantity: 2, unit_price: 65, status: 2)
       @sapphire_invoice = InvoiceItem.create!(item_id: @sapphire.id, invoice_id: @invoice_8.id, quantity: 2, unit_price: 45, status: 2)
       @dream_catcher_invoice = InvoiceItem.create!(item_id: @dream_catcher.id, invoice_id: @invoice_9.id, quantity: 2, unit_price: 25, status: 2)
@@ -77,7 +81,7 @@ RSpec.describe Invoice, type: :model do
       @rash_guard_invoice = InvoiceItem.create!(item_id: @rash_guard.id, invoice_id: @invoice_13.id, quantity: 2, unit_price: 50, status: 2)
       @zinc_invoice = InvoiceItem.create!(item_id: @zinc.id, invoice_id: @invoice_14.id, quantity: 2, unit_price: 13, status: 1)
       @surf_board_invoice = InvoiceItem.create!(item_id: @surf_board.id, invoice_id: @invoice_6.id, quantity: 2, unit_price: 200, status: 1)
-      @snorkel_invoice = InvoiceItem.create!(item_id: @snorkel.id, invoice_id: @invoice_6.id, quantity: 3, unit_price: 400, status: 1)
+      @snorkel_invoice = InvoiceItem.create!(item_id: @snorkel.id, invoice_id: @invoice_6.id, quantity: 21, unit_price: 400, status: 1)
 
       @transaction_1 = Transaction.create!(result: 1, invoice_id: @invoice_1.id, credit_card_number: 0001)
       @transaction_2 = Transaction.create!(result: 1, invoice_id: @invoice_2.id, credit_card_number: 0002)
@@ -102,6 +106,7 @@ RSpec.describe Invoice, type: :model do
       @transaction_21 = Transaction.create!(result: 0, invoice_id: @invoice_21.id, credit_card_number: 0016)
       @transaction_22 = Transaction.create!(result: 0, invoice_id: @invoice_17.id, credit_card_number: 0016)
     end
+
     describe '#invoice_item(item_id)' do
       it 'gives us access to each invoice item' do
         expect(@invoice_6.invoice_item(@emerald.id)).to eq(@emerald_invoice)
@@ -111,13 +116,28 @@ RSpec.describe Invoice, type: :model do
 
     describe '#total_revenue(merchant_id)' do
       it 'gives us the total revenue of all items on this invoice that belong to the given merchant' do
-        expect(@invoice_6.total_revenue(@surf_designs.id)).to eq(1600)
+        expect(@invoice_6.total_revenue(@crystal_moon.id)).to eq(425)
+        expect(@invoice_6.total_revenue(@surf_designs.id)).to eq(8800)
       end
     end
 
     describe '#admin_total_revenue' do
       it 'gives us the total revenue of all items on this invoice that belong to all merchants' do
-        expect(@invoice_6.admin_total_revenue).to eq(1770)
+        expect(@invoice_6.admin_total_revenue).to eq(9225)
+      end
+    end
+
+    describe '#discount_amount(merchant_id)' do
+      it 'provides the total amount of money being taken off for a disocunt' do
+        expect(@invoice_6.discount_amount(@crystal_moon.id)).to eq(63.75)
+        expect(@invoice_6.discount_amount(@surf_designs.id)).to eq(2520)
+      end
+    end
+
+    describe '#revenue_after_discount(merchant_id)' do
+      it 'provides a merchants invoice revenue with applied bulk discounts on applicable items' do
+        expect(@invoice_6.revenue_after_discount(@crystal_moon.id)).to eq(361.25)
+        expect(@invoice_6.revenue_after_discount(@surf_designs.id)).to eq(6280)
       end
     end
   end

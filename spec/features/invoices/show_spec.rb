@@ -7,6 +7,10 @@ RSpec.describe 'merchant invoices show page' do
         @crystal_moon = Merchant.create!(name: "Crystal Moon Designs")
         @surf_designs = Merchant.create!(name: "Surf & Co. Designs")
 
+        @bulk_discount_a = BulkDiscount.create!(merchant_id: @crystal_moon.id, percentage_discount: 20, quantity_threshold: 10)
+        @bulk_discount_b = BulkDiscount.create!(merchant_id: @crystal_moon.id, percentage_discount: 15, quantity_threshold: 5)
+        @bulk_discount_c = BulkDiscount.create!(merchant_id: @surf_designs.id, percentage_discount: 30, quantity_threshold: 20)
+    
         @pearl = @crystal_moon.items.create!(name: "Pearl", description: "Not a BlackPearl!", unit_price: 25)
         @moon_rock = @crystal_moon.items.create!(name: "Moon Rock", description: "Evolve Your Pokemon!", unit_price: 105)
         @lapis_lazuli = @crystal_moon.items.create!(name: "Lapis Lazuli", description: "Not the Jewel Knight!", unit_price: 45)
@@ -23,7 +27,6 @@ RSpec.describe 'merchant invoices show page' do
         @zinc = @surf_designs.items.create!(name: "100% Zinc Face Protectant", description: "Our original organic formula!", unit_price: 13)
         @surf_board = @surf_designs.items.create!(name: "Surf Board", description: "Our original 12' board!", unit_price: 200)
         @snorkel = @surf_designs.items.create!(name: "Snorkel", description: "Perfect for reef viewing!", unit_price: 400)
-
 
         @paul = Customer.create!(first_name: "Paul", last_name: "Walker")
         @sam = Customer.create!(first_name: "Sam", last_name: "Gamgee")
@@ -52,7 +55,7 @@ RSpec.describe 'merchant invoices show page' do
         @lapis_lazuli_invoice = InvoiceItem.create!(item_id: @lapis_lazuli.id, invoice_id: @invoice_3.id, quantity: 2, unit_price: 45, status: 1)
         @topaz_invoice = InvoiceItem.create!(item_id: @topaz.id, invoice_id: @invoice_4.id, quantity: 2, unit_price: 55, status: 1)
         @amethyst_invoice = InvoiceItem.create!(item_id: @amethyst.id, invoice_id: @invoice_5.id, quantity: 2, unit_price: 55, status: 2)
-        @emerald_invoice = InvoiceItem.create!(item_id: @emerald.id, invoice_id: @invoice_6.id, quantity: 2, unit_price: 85, status: 2)
+        @emerald_invoice = InvoiceItem.create!(item_id: @emerald.id, invoice_id: @invoice_6.id, quantity: 5, unit_price: 85, status: 2)
         @ruby_invoice = InvoiceItem.create!(item_id: @ruby.id, invoice_id: @invoice_7.id, quantity: 2, unit_price: 65, status: 2)
         @sapphire_invoice = InvoiceItem.create!(item_id: @sapphire.id, invoice_id: @invoice_8.id, quantity: 2, unit_price: 45, status: 2)
         @dream_catcher_invoice = InvoiceItem.create!(item_id: @dream_catcher.id, invoice_id: @invoice_9.id, quantity: 2, unit_price: 25, status: 2)
@@ -62,7 +65,7 @@ RSpec.describe 'merchant invoices show page' do
         @rash_guard_invoice = InvoiceItem.create!(item_id: @rash_guard.id, invoice_id: @invoice_13.id, quantity: 2, unit_price: 50, status: 2)
         @zinc_invoice = InvoiceItem.create!(item_id: @zinc.id, invoice_id: @invoice_14.id, quantity: 2, unit_price: 13, status: 1)
         @surf_board_invoice = InvoiceItem.create!(item_id: @surf_board.id, invoice_id: @invoice_6.id, quantity: 2, unit_price: 200, status: 1)
-        @snorkel_invoice = InvoiceItem.create!(item_id: @snorkel.id, invoice_id: @invoice_6.id, quantity: 3, unit_price: 400, status: 1)
+        @snorkel_invoice = InvoiceItem.create!(item_id: @snorkel.id, invoice_id: @invoice_6.id, quantity: 21, unit_price: 400, status: 1)
 
         @transaction_1 = Transaction.create!(result: 1, invoice_id: @invoice_1.id, credit_card_number: 0001)
         @transaction_2 = Transaction.create!(result: 1, invoice_id: @invoice_2.id, credit_card_number: 0002)
@@ -113,7 +116,14 @@ RSpec.describe 'merchant invoices show page' do
       it 'displays the total revenue generated from all of the merchant items on the invoice' do
         visit merchant_invoice_path(@surf_designs, @invoice_6)
 
-        expect(page).to have_content("Total revenue for invoice #{@invoice_6.id}: $16.0")
+        expect(page).to have_content("Total pre-discount revenue for invoice ##{@invoice_6.id}: $8800.0")
+      end
+
+      it 'displays the total discounted revenue for my merchant from this invoice which includes bulk discounts
+      in the calculation' do
+        visit merchant_invoice_path(@surf_designs, @invoice_6)
+
+        expect(page).to have_content("Total revenue for invoice ##{@invoice_6.id} with applicable bulk discounts: $6280.0") # $5880 snorkle 
       end
     end
   end
