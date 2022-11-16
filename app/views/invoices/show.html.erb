@@ -1,35 +1,29 @@
 <%= render partial: "layouts/merchant_header", locals: {page_name: @merchant.name, merchant_id: @merchant.id}%>
 
 <h3><%= @merchant.name %>: Information for Invoice #<%= @invoice.id %></h3>
-<p>Invoice: <%=@invoice.id%></p>
-<p>Status: <%=@invoice.status%></p>
-<p>Created On: <%=@invoice.created_at.strftime("%A, %B%e, %Y")%></p>
+<p>Invoice: <%= @invoice.id %></p>
+<p>Status: <%= @invoice.status %></p>
+<p>Created On: <%= @invoice.created_at.strftime("%A, %B %e, %Y") %></p>
 <p>Customer: <%=@invoice.customer.first_name%> <%=@invoice.customer.last_name%></p>
 <p>----------------------------------------</p>
 <b>Items from <%= @merchant.name %> on this invoice:</b>
 
 <% @invoice.items.each do |item| %>
-  <div id="item-<%= item.id %>
-    <% if @merchant.id == item.merchant_id %>
-      <p>Item Name: <%= item.name %></p>
-      <p>Quantity: <%= @invoice.invoice_item(item.id).quantity %></p>
-      <p>Selling Price: $<%=sprintf("%.2f", @invoice.invoice_item(item.id).unit_price.round(2))%> per unit</p>
-      
-      <% if @invoice.invoice_item(item.id).discount_applied != nil %>
-        <% @bulk_discounts.each do |discount| %>
-          <%= link_to "Quanity Meets #{discount.percentage_discount}% Bulk Discount", :href => merchant_bulk_discount_path(@merchant, discount)
-        <% end %>
-      <% end %>
-
-      <%= form_with url: "/merchants/#{@merchant.id}/invoices/#{@invoice.id}", method: :patch, local: true do |form| %>
-        <%= form.hidden_field :invoice_item_id, value: "#{@invoice.invoice_item(item.id).id}" %>
-        <%= form.label "Status: " %>
-        <%= form.select :status, options_for_select([["Pending", "pending"], ["Packaged", "packaged"], ["Shipped", "shipped"]], @invoice.invoice_item(item.id).status) %>
-        <%= form.submit "Update Item Status" %>
-      <% end %>
-    ----------------------------------------
+  <% if @merchant.id == item.merchant_id %>
+    <p>Item Name: <%= item.name %></p>
+    <p>Quantity: <%= @invoice.invoice_item(item.id).quantity %></p>
+    <% if @invoice.invoice_item(item.id).discount_applied.present? %>
+    <p>Quanity Meets <%= link_to "#{@invoice.invoice_item(item.id).discount_applied.percentage_discount}", merchant_bulk_discount_path(@merchant, @invoice.invoice_item(item.id).discount_applied)%>% Bulk Discount </p>
     <% end %>
-  </div>
+    <p>Selling Price: $<%=sprintf("%.2f", @invoice.invoice_item(item.id).unit_price.round(2))%> per unit</p>
+    <%= form_with url: "/merchants/#{@merchant.id}/invoices/#{@invoice.id}", method: :patch, local: true do |form| %>
+      <%= form.hidden_field :invoice_item_id, value: "#{@invoice.invoice_item(item.id).id}" %>
+      <%= form.label "Status: " %>
+      <%= form.select :status, options_for_select([["Pending", "pending"], ["Packaged", "packaged"], ["Shipped", "shipped"]], @invoice.invoice_item(item.id).status) %>
+      <%= form.submit "Update Item Status" %>
+    <% end %>
+  ----------------------------------------
+  <% end %>
 <% end %>
 
 <p>Total pre-discount revenue for invoice #<%= @invoice.id %>: $<%=@total_revenue%></p>

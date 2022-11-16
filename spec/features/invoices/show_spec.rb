@@ -89,7 +89,7 @@ RSpec.describe 'merchant invoices show page' do
 
         expect(page).to have_content("Invoice: #{@invoice_12.id}")
         expect(page).to have_content("Status: #{@invoice_12.status}")
-        expect(page).to have_content("Created On: #{@invoice_12.created_at.strftime("%A, %B%e, %Y")}")
+        expect(page).to have_content("Created On: #{@invoice_12.created_at.strftime("%A, %B %e, %Y")}")
         expect(page).to have_content("Customer: #{@invoice_12.customer.first_name} #{@invoice_12.customer.last_name}")
       end
 
@@ -145,17 +145,9 @@ RSpec.describe 'merchant invoices show page' do
 
         visit merchant_invoice_path(graphic_tees, invoice)
 
-        within "#item-#{black_tee.id}" do 
-          expect(page).to have_link("Quanity Meets 20% Bulk Discount", :href => merchant_bulk_discount_path(graphic_tees, discount_1))
-        end
-
-        within "#item-#{green_tee.id}" do 
-          expect(page).to have_link("Quanity Meets 15% Bulk Discount", :href => merchant_bulk_discount_path(graphic_tees, discount_2))
-        end
-
-        within "#item-#{pink_tee.id}" do 
-          expect(page).to have_link("Quanity Meets 30% Bulk Discount", :href => merchant_bulk_discount_path(graphic_tees, discount_3))
-        end
+        expect(page).to have_link("20", :href => merchant_bulk_discount_path(graphic_tees, discount_1))
+        expect(page).to have_link("15", :href => merchant_bulk_discount_path(graphic_tees, discount_2))
+        expect(page).to have_link("30", :href => merchant_bulk_discount_path(graphic_tees, discount_3))
       end
     end
   end
