@@ -11,6 +11,7 @@
 <p>Created on <%=@invoice.created_at.strftime("%A, %B %e, %Y")%></p>
 <p>Customer: <%="#{@customer.first_name} #{@customer.last_name}"%></p>
 <p>Total Revenue: $<%= @invoice.admin_total_revenue %></p>
+<p>Total revenue for invoice #<%= @invoice.id %> with applicable bulk discounts: $<%= @invoice.admin_revenue_after_discount %></p>
 
 <div id="invoice_items">
   <h2>--- Items ---</h2>

@@ -170,10 +170,10 @@ RSpec.feature "Admin Invoice Show Page", type: :feature do
       pink_g_invoice = InvoiceItem.create!(item_id: pink_glitter.id, invoice_id: invoice.id, quantity: 20, unit_price: 55, status: 1)
       transaction = Transaction.create!(result: 1, invoice_id: invoice.id, credit_card_number: 0001)
 
-      visit admin_invoice_path(graphic_tees)
+      visit admin_invoice_path(invoice)
 
-      expect(page).to have_content("Total Revenue: $2515")
-      expect(page).to have_content("Total revenue for invoice ##{invoice.id} with applicable bulk discounts: $1927.75")
+      expect(page).to have_content("Total Revenue: $3615")
+      expect(page).to have_content("Total revenue for invoice ##{invoice.id} with applicable bulk discounts: $3027.75")
     end
   end
 end
