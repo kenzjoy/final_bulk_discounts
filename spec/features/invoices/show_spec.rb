@@ -145,10 +145,6 @@ RSpec.describe 'merchant invoices show page' do
 
         visit merchant_invoice_path(graphic_tees, invoice)
 
-        within "#item-#{white_tee.id}" do 
-          expect(page).to_not have_link("Quanity Meets 20% Bulk Discount", :href => merchant_bulk_discount_path(graphic_tees, discount_1))
-        end
-
         within "#item-#{black_tee.id}" do 
           expect(page).to have_link("Quanity Meets 20% Bulk Discount", :href => merchant_bulk_discount_path(graphic_tees, discount_1))
         end

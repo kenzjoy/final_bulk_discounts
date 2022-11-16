@@ -113,5 +113,30 @@ RSpec.describe InvoiceItem, type: :model do
         expect(InvoiceItem.not_shipped.sort_by_invoice_creation_date).to eq([@pearl_invoice, @moon_rock_invoice, @lapis_lazuli_invoice, @topaz_invoice, @surf_board_invoice, @zinc_invoice])
       end
     end
+
+    describe '#discount_applied' do
+      it 'returns a discount applied to an invoice item, returns nil if not applicable' do
+        graphic_tees = Merchant.create!(name: "Sick Graphic Tees")
+        discount_1 = BulkDiscount.create!(merchant_id: graphic_tees.id, percentage_discount: 20, quantity_threshold: 10)
+        discount_2 = BulkDiscount.create!(merchant_id: graphic_tees.id, percentage_discount: 15, quantity_threshold: 5)
+        discount_3 = BulkDiscount.create!(merchant_id: graphic_tees.id, percentage_discount: 30, quantity_threshold: 20)
+        white_tee = graphic_tees.items.create!(name: "White Tee", description: "Freshy Fresh", unit_price: 25)
+        black_tee = graphic_tees.items.create!(name: "Black Tee", description: "Smooth", unit_price: 105)
+        green_tee = graphic_tees.items.create!(name: "Green Tee", description: "Minty Fresh", unit_price: 45)
+        pink_tee = graphic_tees.items.create!(name: "Pink Tee", description: "An androgynous delight", unit_price: 55)
+        paulito = Customer.create!(first_name: "Paulito", last_name: "Pequino")
+        invoice = Invoice.create!(status: 2, customer_id: paulito.id)
+        white_tee_invoice = InvoiceItem.create!(item_id: white_tee.id, invoice_id: invoice.id, quantity: 2, unit_price: 25, status: 1)
+        black_tee_invoice = InvoiceItem.create!(item_id: black_tee.id, invoice_id: invoice.id, quantity: 10, unit_price: 105, status: 1)
+        green_tee_invoice = InvoiceItem.create!(item_id: green_tee.id, invoice_id: invoice.id, quantity: 7, unit_price: 45, status: 1)
+        pink_tee_invoice = InvoiceItem.create!(item_id: pink_tee.id, invoice_id: invoice.id, quantity: 20, unit_price: 55, status: 1)
+        transaction = Transaction.create!(result: 1, invoice_id: invoice.id, credit_card_number: 0001)
+
+        expect(white_tee_invoice.discount_applied).to eq(nil)
+        expect(black_tee_invoice.discount_applied).to eq(discount_1)
+        expect(green_tee_invoice.discount_applied).to eq(discount_2)
+        expect(pink_tee_invoice.discount_applied).to eq(discount_3)
+      end
+    end
   end
 end
