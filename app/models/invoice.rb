@@ -36,6 +36,6 @@ class Invoice < ApplicationRecord
   end
 
   def revenue_after_discount(merchant_id)
-
+    total_revenue(merchant_id) - discount_amount(merchant_id)
   end
 end
